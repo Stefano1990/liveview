@@ -7,12 +7,22 @@ defmodule PentoWeb.ProductLive.FormComponent do
   def update(%{product: product} = assigns, socket) do
     changeset = Catalog.change_product(product)
 
-    IO.inspect(changeset)
-
     {:ok,
      socket
      |> assign(assigns)
-     |> assign(:changeset, changeset)}
+     |> assign(:changeset, changeset)
+     |> allow_upload(:image,
+        accept: ~w(.jpg .jpeg .png),
+        max_entries: 1,
+        max_file_size: 9_000_000,
+        auto_upload: true,
+        progress: &handle_progress/3
+      )
+    }
+  end
+
+  defp handle_progress(:image, entry, socket) do
+    {:noreply, socket}
   end
 
   @impl true
