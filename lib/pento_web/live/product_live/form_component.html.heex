@@ -31,6 +31,22 @@
       <%= live_file_input @uploads.image %>
     </div>
 
+    <%= for entry <- @uploads.image.entries do %>
+      <div style="margin-bottom: 16px; border: 1px solid green; text-align: center; position: relative;">
+        <div style={"background-color: limegreen; width: #{entry.progress}%; height: 100%; position: absolute; z-index: -1"}></div>
+        <span style=""><%= entry.progress %>%</span>
+      </div>
+    <% end %>
+
+    <article class="column">
+      <img
+        alt="product image"
+        width="200"
+        height="200"
+        src={Routes.static_path(@socket, (@product.image_path || ~s[/images/default-thumbnail.png]))}
+      />
+    </article>
+
     <div>
       <%= submit "Save", phx_disable_with: "Saving...", disabled: !@changeset.valid? %>
     </div>

@@ -22,25 +22,45 @@ defmodule PentoWeb.ProductLive.FormComponent do
   end
 
   defp handle_progress(:image, entry, socket) do
+    if entry.done? do
+      path = consume_uploaded_entry(
+        socket,
+        entry,
+        &upload_static_file(&1, socket)
+      )
+      {
+        :noreply,
+        socket
+        |> put_flash(:info, "file uploaded")
+        |> assign(:image_path, path)
+      }
+    end
     {:noreply, socket}
   end
 
+  defp upload_static_file(%{path: path}, socket) do
+    # Plug in your production image file persistence implementation here!
+    dest = Path.join("priv/static/images", Path.basename(path))
+    File.cp!(path, dest)
+    {:ok, Routes.static_path(socket, "/images/#{Path.basename(dest)}")}
+  end
+
   @impl true
-  def handle_event("validate", %{"product" => product_params}, socket) do
+  def handle_event("validate", %{"product" => params}, socket) do
     changeset =
       socket.assigns.product
-      |> Catalog.change_product(product_params)
+      |> Catalog.change_product(product_params(params, socket))
       |> Map.put(:action, :validate)
 
     {:noreply, assign(socket, :changeset, changeset)}
   end
 
-  def handle_event("save", %{"product" => product_params}, socket) do
-    save_product(socket, socket.assigns.action, product_params)
+  def handle_event("save", %{"product" => params}, socket) do
+    save_product(socket, socket.assigns.action, product_params(params, socket))
   end
 
-  defp save_product(socket, :edit, product_params) do
-    case Catalog.update_product(socket.assigns.product, product_params) do
+  defp save_product(socket, :edit, params) do
+    case Catalog.update_product(socket.assigns.product, params) do
       {:ok, _product} ->
         {:noreply,
          socket
@@ -52,8 +72,8 @@ defmodule PentoWeb.ProductLive.FormComponent do
     end
   end
 
-  defp save_product(socket, :new, product_params) do
-    case Catalog.create_product(product_params) do
+  defp save_product(socket, :new, params) do
+    case Catalog.create_product(params) do
       {:ok, _product} ->
         {:noreply,
          socket
@@ -63,5 +83,9 @@ defmodule PentoWeb.ProductLive.FormComponent do
       {:error, %Ecto.Changeset{} = changeset} ->
         {:noreply, assign(socket, changeset: changeset)}
     end
+  end
+
+  defp product_params(params, socket) do
+    Map.put(params, "image_path", socket.assigns.image_path)
   end
 end
