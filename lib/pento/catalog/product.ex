@@ -11,6 +11,8 @@ defmodule Pento.Catalog.Product do
     field :image_thumbnail_path, :string
 
     timestamps()
+
+    has_many :ratings, Rating
   end
 
   @doc false

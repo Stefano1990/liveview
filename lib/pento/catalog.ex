@@ -7,6 +7,7 @@ defmodule Pento.Catalog do
   alias Pento.Repo
 
   alias Pento.Catalog.Product
+  alias Pento.Accounts.User
 
   @doc """
   Returns the list of products.
@@ -19,6 +20,11 @@ defmodule Pento.Catalog do
   """
   def list_products do
     Repo.all(Product)
+  end
+
+  def list_products_with_user_rating(%User{} = user) do
+    Product.Query.with_user_ratings(user)
+    |> Repo.all()
   end
 
   @doc """
