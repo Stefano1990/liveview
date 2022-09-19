@@ -1,12 +1,20 @@
 defmodule PentoWeb.UserAuthLive do
   import Phoenix.LiveView
   alias Pento.Accounts
+  alias Pento.Accounts.User
 
-  def on_mount(_, params, %{"user_token" => user_token}, socket) do
-    Accounts.get_user_by_session_token(user_token)
-    |> check_if_valid_user(socket)
+  def on_mount(_, _params, %{"user_token" => user_token}, socket) do
+    socket
+    |> assign_new(:current_user, fn ->
+      Accounts.get_user_by_session_token(user_token)
+    end)
+    |> check_if_valid_user()
   end
 
-  defp check_if_valid_user(user = %Pento.Accounts.User{}, socket), do: {:cont, assign(socket, current_user: user)}
-  defp check_if_valid_user(_, socket), do: {:halt, redirect(socket, to: "/login")}
+  defp check_if_valid_user(socket = %{assigns: %{current_user: %User{}}}) do
+    {:cont, socket}
+  end
+  defp check_if_valid_user(socket) do
+    {:halt, redirect(socket, to: "/login")}
+  end
 end

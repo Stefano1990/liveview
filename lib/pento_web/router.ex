@@ -19,11 +19,13 @@ defmodule PentoWeb.Router do
 
   scope "/", PentoWeb do
     pipe_through [:browser, :require_authenticated_user]
-    
+
     live_session :default, on_mount: PentoWeb.UserAuthLive do
       live "/guess", WrongLive
-      
+
       live "/promo", PromoLive
+      live "/survey", SurveyLive, :index
+
 
       live "/products", ProductLive.Index, :index
       live "/products/new", ProductLive.Index, :new

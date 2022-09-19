@@ -1,0 +1,13 @@
+<section class="row">
+  <h1>Survey</h1>
+</section>
+
+<section class="column">
+  <%= if @demographic do %>
+    <Component.hero content="Demographic">
+      <DemographicLive.Show.details demographic={@demographic} />
+    </Component.hero>
+  <% else %>
+    <h2>Demographic Form coming soon!</h2>
+  <% end %>
+</section>
